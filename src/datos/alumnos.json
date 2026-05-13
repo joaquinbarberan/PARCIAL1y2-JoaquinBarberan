@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nombre": "Josefina",
+    "apellido": "Pérez",
+    "grado": "6 C",
+    "asistencia": 90
+  },
+  {
+    "id": 2,
+    "nombre": "Joaquin ",
+    "apellido": "Barberan",
+    "grado": "5 A",
+    "asistencia": 75
+  },
+  {
+    "id": 3,
+    "nombre": "Lisandro",
+    "apellido": "Muñoz",
+    "grado": "6 C",
+    "asistencia": 85
+  }
+]
