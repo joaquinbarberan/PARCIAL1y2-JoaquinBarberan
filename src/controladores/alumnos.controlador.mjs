@@ -1,46 +1,55 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import * as modeloAlumno from '../modelos/alumno.modelo.mjs';
 
-// Configuramos la ruta al archivo JSON
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PATH_JSON = path.join(__dirname, '../datos/alumnos.json');
 
-export const obtenerAlumnos = async (req, res) => {
-    // Leemos el archivo JSON
-    const contenido = await fs.readFile(PATH_JSON, 'utf-8');
-    const alumnos = JSON.parse(contenido);
-    
-    // Devolvemos la respuesta 
-    res.json(alumnos);
-};
-export const obtenerPorId = async (req, res) => {
-    const id_buscado = Number(req.params.id); // Convertimos el ID a número para comparar con el JSON
-
-    const contenido = await fs.readFile(PATH_JSON, 'utf-8');
-    const alumnos = JSON.parse(contenido);
-
-    // Buscamos el alumno que coincida con el ID
-    const alumno = alumnos.find((a) => Number(a.id) === id_buscado);
-
-    if (alumno) {
-        res.json(alumno);
-    } else {
-        const respuesta = {
-            mensaje: "alumno no encontrado",
-        };
-        res.status(404).json(respuesta);
+/**
+ * Endpoint de consulta REST: devuelve la lista completa de alumnos.
+ * GET /alumnos
+ */
+export const obtenerAlumnos = async (peticion, respuesta) => {
+    try {
+        const alumnos = await modeloAlumno.obtenerTodos();
+        respuesta.status(200).json(alumnos);
+    } catch (error) {
+        console.error('Error al obtener alumnos:', error.message);
+        respuesta.status(500).json({ error: 'No se pudieron obtener los alumnos.' });
     }
 };
-export const obtenerEstadisticas = async (req, res) => {
-    const contenido = await fs.readFile(PATH_JSON, 'utf-8');
-    const alumnos = JSON.parse(contenido);
-    
-    // Contar cuántos alumnos hay en total y el promedio de asistencia
-    const totalAlumnos = alumnos.length;
-    
-    res.status(200).json({
-        totalAlumnosRegistrados: totalAlumnos,
-    });
+
+/**
+ * Endpoint de consulta REST: devuelve un alumno según su id.
+ * GET /alumnos/:id
+ */
+export const obtenerPorId = async (peticion, respuesta) => {
+    try {
+        const idBuscado = Number(peticion.params.id);
+        const alumno = await modeloAlumno.obtenerPorId(idBuscado);
+
+        if (!alumno) {
+            return respuesta.status(404).json({ mensaje: 'Alumno no encontrado' });
+        }
+
+        respuesta.status(200).json(alumno);
+    } catch (error) {
+        console.error('Error al obtener el alumno:', error.message);
+        respuesta.status(500).json({ error: 'No se pudo obtener el alumno.' });
+    }
+};
+
+/**
+ * Endpoint de procedimiento: calcula estadísticas de los alumnos
+ * (cantidad total registrada).
+ * GET /alumnos/estadisticas
+ */
+export const obtenerEstadisticas = async (peticion, respuesta) => {
+    try {
+        const totalAlumnos = await modeloAlumno.contarAlumnos();
+
+        respuesta.status(200).json({
+            mensaje: 'Procedimiento ejecutado con éxito.',
+            totalAlumnosRegistrados: totalAlumnos,
+        });
+    } catch (error) {
+        console.error('Error al ejecutar el procedimiento:', error.message);
+        respuesta.status(500).json({ error: 'No se pudo ejecutar el procedimiento.' });
+    }
 };

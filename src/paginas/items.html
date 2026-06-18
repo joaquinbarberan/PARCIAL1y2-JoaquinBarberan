@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+    <!-- Menú de navegación. "Cerrar sesión" apunta a /cerrar-sesion,
+         que elimina la cookie desde el servidor. -->
+    <nav class="menu">
+        <span class="menu-marca">Gestión de Alumnos</span>
+        <div class="menu-enlaces">
+            <a href="/items">Items</a>
+            <a href="/procedimiento">Procedimiento</a>
+            <a href="/cerrar-sesion" class="menu-salir">Cerrar sesión</a>
+        </div>
+    </nav>
+
+    <main class="contenedor">
+        <h1>Listado de alumnos</h1>
+        <p class="subtitulo">Datos obtenidos desde el endpoint <code>/alumnos</code> de la API.</p>
+
+        <!-- Aquí se inyecta dinámicamente la lista de items. -->
+        <div id="contenedor-items">
+            <p>Cargando alumnos…</p>
+        </div>
+    </main>
+
+    <footer class="pie">
+        <p>Aplicaciones Web 2 — Parcial 2 — Joaquín Barberán</p>
+    </footer>
+
+    <script>
+        // Consume la API protegida desde el front. La cookie con el Token
+        // de acceso se envía automáticamente (mismo dominio y puerto).
+        async function cargarItems() {
+            const contenedor = document.getElementById('contenedor-items');
+            try {
+                const respuesta = await fetch('/alumnos');
+
+                // Si el token expiró o no hay sesión, la API responde 401.
+                if (respuesta.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron cargar los alumnos.');
+                }
+
+                const alumnos = await respuesta.json();
+
+                if (alumnos.length === 0) {
+                    contenedor.innerHTML = '<p>No hay alumnos registrados.</p>';
+                    return;
+                }
+
+                // Cada item enlaza a la página Item construyendo el endpoint
+                // desde el front con query string (?id=).
+                const filas = alumnos.map((alumno) => `
+                    <tr>
+                        <td>${alumno.id}</td>
+                        <td>${alumno.nombre} ${alumno.apellido}</td>
+                        <td>${alumno.grado}</td>
+                        <td><a class="enlace" href="/item?id=${alumno.id}">Ver detalle</a></td>
+                    </tr>
+                `).join('');
+
+                contenedor.innerHTML = `
+                    <table class="tabla">
+                        <thead>
+                            <tr><th>ID</th><th>Alumno</th><th>Grado</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                `;
+            } catch (error) {
+                contenedor.innerHTML = `<p class="mensaje-error">${error.message}</p>`;
+            }
+        }
+
+        cargarItems();
+    </script>
+</body>
+</html>

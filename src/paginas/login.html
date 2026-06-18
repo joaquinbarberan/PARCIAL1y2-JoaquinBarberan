@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+    <main class="contenedor contenedor-login">
+        <section class="tarjeta tarjeta-login">
+            <h1>Iniciar sesión</h1>
+            <p class="subtitulo">Ingrese sus credenciales para acceder a la aplicación.</p>
+
+            <!-- Si el login falla, el servidor redirige con ?error= y el
+                 mensaje se muestra aquí mediante JavaScript. -->
+            <p id="mensaje-error" class="mensaje-error" style="display: none;"></p>
+
+            <form action="/login" method="POST" class="formulario">
+                <label for="usuario">Usuario</label>
+                <input type="text" id="usuario" name="usuario" required autofocus>
+
+                <label for="contrasenia">Contraseña</label>
+                <input type="password" id="contrasenia" name="contrasenia" required>
+
+                <button type="submit" class="boton">Ingresar</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="pie">
+        <p>Aplicaciones Web 2 — Parcial 2 — Joaquín Barberán</p>
+    </footer>
+
+    <script>
+        // Lee el parámetro ?error= de la URL y muestra el mensaje correspondiente.
+        const parametros = new URLSearchParams(window.location.search);
+        const error = parametros.get('error');
+
+        if (error) {
+            const mensajes = {
+                credenciales: 'Usuario o contraseña incorrectos.',
+                faltan: 'Debe completar usuario y contraseña.',
+                servidor: 'Ocurrió un error en el servidor. Intente nuevamente.',
+            };
+            const cartel = document.getElementById('mensaje-error');
+            cartel.textContent = mensajes[error] || 'No se pudo iniciar sesión.';
+            cartel.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

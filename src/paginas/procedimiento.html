@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedimiento</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+    <nav class="menu">
+        <span class="menu-marca">Gestión de Alumnos</span>
+        <div class="menu-enlaces">
+            <a href="/items">Items</a>
+            <a href="/procedimiento">Procedimiento</a>
+            <a href="/cerrar-sesion" class="menu-salir">Cerrar sesión</a>
+        </div>
+    </nav>
+
+    <main class="contenedor">
+        <h1>Procedimiento: estadísticas de alumnos</h1>
+
+        <!-- Texto explicativo del procedimiento para el usuario. -->
+        <p class="subtitulo">
+            Este procedimiento consulta el endpoint <code>/alumnos/estadisticas</code> y
+            calcula la <strong>cantidad total de alumnos registrados</strong> en el sistema.
+            Presione el botón para ejecutarlo; abajo se mostrará el resultado y si la
+            ejecución fue exitosa o no.
+        </p>
+
+        <button id="boton-ejecutar" class="boton">Ejecutar procedimiento</button>
+
+        <!-- Aquí se muestra el resultado de la ejecución. -->
+        <div id="resultado" class="resultado"></div>
+    </main>
+
+    <footer class="pie">
+        <p>Aplicaciones Web 2 — Parcial 2 — Joaquín Barberán</p>
+    </footer>
+
+    <script>
+        const boton = document.getElementById('boton-ejecutar');
+        const contenedorResultado = document.getElementById('resultado');
+
+        boton.addEventListener('click', async () => {
+            contenedorResultado.className = 'resultado';
+            contenedorResultado.textContent = 'Ejecutando procedimiento…';
+
+            try {
+                const respuesta = await fetch('/alumnos/estadisticas');
+
+                if (respuesta.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const datos = await respuesta.json();
+
+                if (!respuesta.ok) {
+                    throw new Error(datos.error || 'El procedimiento no se ejecutó correctamente.');
+                }
+
+                // Procedimiento ejecutado con éxito: se muestran los datos devueltos.
+                contenedorResultado.className = 'resultado resultado-exito';
+                contenedorResultado.innerHTML = `
+                    <p><strong>✔ ${datos.mensaje}</strong></p>
+                    <p>Total de alumnos registrados: <strong>${datos.totalAlumnosRegistrados}</strong></p>
+                `;
+            } catch (error) {
+                // El procedimiento falló: se informa al usuario.
+                contenedorResultado.className = 'resultado resultado-error';
+                contenedorResultado.innerHTML = `<p><strong>✖ Error:</strong> ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
